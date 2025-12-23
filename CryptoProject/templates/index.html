@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoCore | Market Intelligence</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --accent-color: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.4);
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            --bg-deep: #030014;
+        }
+
+        * { box-sizing: border-box; outline: none; }
+
+        body {
+            margin: 0; background-color: var(--bg-deep); color: var(--text-main);
+            font-family: 'Plus Jakarta Sans', sans-serif; height: 100vh; width: 100vw;
+            overflow: hidden; display: flex; justify-content: center; align-items: center;
+        }
+
+        .ambient-light {
+            position: absolute; width: 100%; height: 100%; z-index: -1;
+            background: radial-gradient(circle at 0% 0%, #2e1065 0%, transparent 50%),
+                        radial-gradient(circle at 100% 100%, #4c1d95 0%, transparent 50%);
+            filter: blur(60px); opacity: 0.8;
+        }
+
+        .dashboard-wrapper {
+            width: 95%; height: 90%; display: grid;
+            grid-template-columns: 350px 1fr; gap: 24px;
+        }
+
+        /* --- SIDEBAR --- */
+        .glass-panel {
+            background: var(--glass-bg); backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border); border-radius: 24px; padding: 32px;
+            display: flex; flex-direction: column;
+        }
+
+        .brand-header {
+            font-size: 1.5rem; font-weight: 700; margin-bottom: 10px;
+            background: linear-gradient(90deg, #fff, #94a3b8);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        
+        .user-welcome {
+            font-size: 0.85rem; color: var(--text-muted); margin-bottom: 30px;
+        }
+
+        .input-group { margin-bottom: 20px; }
+        .label-text { font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; display: block; font-weight: 600; }
+
+        select, input {
+            width: 100%; background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--glass-border); border-radius: 12px; padding: 12px;
+            color: white; font-family: inherit; font-size: 0.95rem;
+        }
+        select:focus, input:focus { border-color: var(--accent-color); background: rgba(0, 0, 0, 0.4); }
+
+        .run-btn {
+            margin-top: 20px; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: white; border: none; border-radius: 12px; padding: 16px;
+            font-weight: 600; cursor: pointer; transition: 0.3s;
+        }
+        .run-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -5px var(--accent-glow); }
+        
+        .logout-btn {
+            margin-top: auto; background: rgba(239, 68, 68, 0.1);
+            color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 12px; padding: 12px; cursor: pointer; text-align: center; text-decoration: none; font-size: 0.9rem;
+        }
+        .logout-btn:hover { background: rgba(239, 68, 68, 0.2); }
+
+        /* --- MAIN CONTENT --- */
+        .viz-panel { display: flex; flex-direction: column; gap: 20px; }
+
+        /* CRYPTO LOGO STRIP */
+        .crypto-strip {
+            display: flex; gap: 20px; overflow: hidden; padding: 10px 0;
+        }
+        .crypto-logo {
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            border-radius: 50%; width: 50px; height: 50px; display: flex; justify-content: center; align-items: center;
+            padding: 8px; backdrop-filter: blur(5px);
+        }
+        .crypto-logo img { width: 100%; height: 100%; object-fit: contain; }
+
+        .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .stat-card {
+            background: var(--glass-bg); backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px;
+        }
+        .stat-label { color: var(--text-muted); font-size: 0.8rem; display: block; margin-bottom: 5px; }
+        .stat-val { font-size: 1.5rem; font-weight: 700; }
+
+        .chart-glass {
+            flex: 1; background: var(--glass-bg); backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border); border-radius: 24px; padding: 20px; position: relative;
+        }
+        
+        /* Loaders */
+        .loader-overlay {
+            position: absolute; inset: 0; background: rgba(3, 0, 20, 0.6); backdrop-filter: blur(5px);
+            border-radius: 24px; display: none; justify-content: center; align-items: center; flex-direction: column;
+        }
+        .pulse-ring {
+            width: 50px; height: 50px; border-radius: 50%; border: 3px solid var(--accent-color); animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0% { transform: scale(0.8); opacity: 0.8; } 100% { transform: scale(1.2); opacity: 0; } }
+
+    </style>
+</head>
+<body>
+
+    <div class="ambient-light"></div>
+
+    <div class="dashboard-wrapper">
+        
+        <aside class="glass-panel">
+            <div class="brand-header">CryptoCore</div>
+            <div class="user-welcome">Logged in as: <strong>{{ username }}</strong></div>
+
+            <div class="input-group">
+                <span class="label-text">Asset</span>
+                <select id="symbol">
+                    <option value="BTC-USD">Bitcoin (BTC)</option>
+                    <option value="ETH-USD">Ethereum (ETH)</option>
+                    <option value="BNB-USD">Binance (BNB)</option>
+                    <option value="SOL-USD">Solana (SOL)</option>
+                    <option value="XRP-USD">Ripple (XRP)</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <span class="label-text">History (Days)</span>
+                <input type="number" id="seqLength" value="60" min="30" max="90">
+            </div>
+
+            <div class="input-group">
+                <span class="label-text">Epoch</span>
+                <input type="number" id="epochs" value="15" min="5" max="50">
+            </div>
+
+            <button class="run-btn" id="trainBtn" onclick="runSequence()">Initiate</button>
+            
+            <a href="/logout" class="logout-btn">Disconnect</a>
+        </aside>
+
+        <main class="viz-panel">
+            
+            <div class="crypto-strip">
+                <div class="crypto-logo" title="Bitcoin">
+                    <img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=026" alt="BTC">
+                </div>
+                <div class="crypto-logo" title="Ethereum">
+                    <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png?v=026" alt="ETH">
+                </div>
+                <div class="crypto-logo" title="Tether">
+                    <img src="https://cryptologos.cc/logos/tether-usdt-logo.png?v=026" alt="USDT">
+                </div>
+                <div class="crypto-logo" title="BNB">
+                    <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png?v=026" alt="BNB">
+                </div>
+                <div class="crypto-logo" title="XRP">
+                    <img src="https://cryptologos.cc/logos/xrp-xrp-logo.png?v=026" alt="XRP">
+                </div>
+                <div class="crypto-logo" title="Solana">
+                    <img src="https://cryptologos.cc/logos/solana-sol-logo.png?v=026" alt="SOL">
+                </div>
+            </div>
+
+            <div class="stats-row">
+                <div class="stat-card">
+                    <span class="stat-label">Prediction</span>
+                    <span class="stat-val" id="latestPrice">---</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Model Accuracy (MAE)</span>
+                    <span class="stat-val" id="maeValue">---</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Loss Function (MSE)</span>
+                    <span class="stat-val" id="mseValue">---</span>
+                </div>
+            </div>
+
+            <div class="chart-glass">
+                <div class="loader-overlay" id="loader">
+                    <div class="pulse-ring"></div>
+                    <p style="margin-top: 15px; font-size: 0.8rem; color: var(--text-muted);">Training...</p>
+                </div>
+                <canvas id="resultChart"></canvas>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // (Same JS logic as before, just integrated)
+        let myChart = null;
+
+        async function runSequence() {
+            const symbol = document.getElementById('symbol').value;
+            const seqLength = document.getElementById('seqLength').value;
+            const epochs = document.getElementById('epochs').value;
+            const btn = document.getElementById('trainBtn');
+            const loader = document.getElementById('loader');
+
+            btn.disabled = true;
+            btn.innerHTML = "Processing...";
+            loader.style.display = "flex";
+            
+            if (myChart) myChart.destroy();
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ symbol, seq_length: seqLength, epochs: epochs })
+                });
+
+                const data = await response.json();
+                if (data.error) { alert(data.error); return; }
+
+                document.getElementById('latestPrice').innerText = "$" + parseFloat(data.latest_price).toFixed(2);
+                document.getElementById('maeValue').innerText = "$" + data.mae;
+                document.getElementById('mseValue').innerText = data.mse;
+
+                renderGlassChart(data.dates, data.actual, data.predicted);
+
+            } catch (error) {
+                console.error(error);
+                alert("Connection Error");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = "Initiate";
+                loader.style.display = "none";
+            }
+        }
+
+        function renderGlassChart(labels, actual, predicted) {
+            const ctx = document.getElementById('resultChart').getContext('2d');
+            
+            let gradActual = ctx.createLinearGradient(0, 0, 0, 400);
+            gradActual.addColorStop(0, 'rgba(255, 255, 255, 0.1)');
+            gradActual.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+            let gradPred = ctx.createLinearGradient(0, 0, 0, 400);
+            gradPred.addColorStop(0, 'rgba(99, 102, 241, 0.2)');
+            gradPred.addColorStop(1, 'rgba(99, 102, 241, 0)');
+
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'History', data: actual, borderColor: 'rgba(255,255,255,0.6)',
+                        borderWidth: 1, backgroundColor: gradActual, fill: true, pointRadius: 0
+                    }, {
+                        label: 'Forecast', data: predicted, borderColor: '#6366f1',
+                        borderWidth: 3, backgroundColor: gradPred, fill: true, pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { x: { display: false }, y: { grid: { color: 'rgba(255,255,255,0.05)' } } }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
