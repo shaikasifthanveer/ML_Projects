@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoCore | Future of Market Intelligence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent: #6366f1;
+            --bg: #030014;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            margin: 0; padding: 0; background: var(--bg); color: white;
+            font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden;
+        }
+
+        /* Ambient Background */
+        .glow {
+            position: fixed; width: 600px; height: 600px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+            top: -200px; right: -200px; z-index: -1;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 30px 10%; border-bottom: 1px solid var(--border);
+        }
+        .logo { font-size: 1.5rem; font-weight: 800; letter-spacing: -1px; }
+        .nav-links a { color: #94a3b8; text-decoration: none; margin-left: 30px; font-size: 0.9rem; transition: 0.3s; }
+        .nav-links a:hover { color: white; }
+
+        /* Hero Section */
+        .hero {
+            height: 80vh; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; text-align: center;
+            padding: 0 10%;
+        }
+        .hero h1 {
+            font-size: clamp(3rem, 8vw, 5rem); margin: 0; line-height: 1.1;
+            background: linear-gradient(to bottom, #fff 40%, #64748b);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .hero p { color: #94a3b8; max-width: 600px; font-size: 1.1rem; line-height: 1.6; margin: 25px 0; }
+
+        .cta-group { display: flex; gap: 15px; }
+        .btn {
+            padding: 16px 32px; border-radius: 12px; font-weight: 600;
+            text-decoration: none; transition: 0.3s; cursor: pointer;
+        }
+        .btn-primary { background: var(--accent); color: white; border: none; }
+        .btn-primary:hover { box-shadow: 0 0 30px rgba(99, 102, 241, 0.4); transform: translateY(-2px); }
+        .btn-secondary { border: 1px solid var(--border); color: white; background: var(--glass); }
+        .btn-secondary:hover { background: rgba(255,255,255,0.08); }
+
+        /* Features Section */
+        .features {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px; padding: 100px 10%;
+        }
+        .feature-card {
+            background: var(--glass); border: 1px solid var(--border);
+            padding: 40px; border-radius: 24px; backdrop-filter: blur(10px);
+        }
+        .feature-card h3 { margin-top: 0; color: var(--accent); }
+        .feature-card p { color: #94a3b8; font-size: 0.95rem; margin-bottom: 0; }
+
+        footer { text-align: center; padding: 50px; color: #475569; font-size: 0.8rem; border-top: 1px solid var(--border); }
+    </style>
+</head>
+<body>
+    <div class="glow"></div>
+    
+    <nav>
+        <div class="logo">CryptoCore</div>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="/login">Login</a>
+            <a href="/register" style="color: white; border: 1px solid var(--accent); padding: 8px 20px; border-radius: 8px;">Join Now</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h1>Predict the Future <br> of Crypto.</h1>
+        <p>Harness high-accuracy LSTM neural networks to analyze market trends and forecast price movements with professional-grade precision.</p>
+        <div class="cta-group">
+            <a href="/register" class="btn btn-primary">Get Started Free</a>
+            <a href="/login" class="btn btn-secondary">Access Terminal</a>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <div class="feature-card">
+            <h3>Neural Analysis</h3>
+            <p>Our AI engine uses Long Short-Term Memory (LSTM) layers to identify complex patterns in historical market data.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Live Intelligence</h3>
+            <p>Direct integration with Yahoo Finance provides real-time data streaming for Bitcoin, Ethereum, and more.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Risk Metrics</h3>
+            <p>Monitor Mean Absolute Error (MAE) and Loss functions to understand the confidence level of every prediction.</p>
+        </div>
+    </section>
+
+    <footer>
+        &copy; 2026 CryptoCore Intelligence. Powered by TensorFlow & Flask.
+    </footer>
+</body>
+</html>
